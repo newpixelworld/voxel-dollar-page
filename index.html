@@ -3,203 +3,86 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>VoxelDollarPage (Prototype)</title>
+  <title>VoxelDollarPage - Debug</title>
   <style>
-    body { margin:0; overflow:hidden; font-family: Arial, sans-serif; background:#0b0f14; }
-    #ui{
-      position:fixed; top:12px; left:12px; z-index:10;
-      color:#fff; background:rgba(0,0,0,.65); padding:12px 14px; border-radius:12px;
-      width:340px;
+    body { margin:0; overflow:hidden; background:#0b0f14; font-family: Arial, sans-serif; }
+    #dbg {
+      position:fixed; bottom:12px; left:12px; z-index:9999;
+      background:rgba(0,0,0,.75); color:#fff; padding:10px 12px; border-radius:10px;
+      max-width: 520px; font-size: 12px; line-height: 1.35;
+      border: 1px solid rgba(255,255,255,.15);
+      white-space: pre-wrap;
     }
-    #ui button{ width:100%; cursor:pointer; padding:10px 12px; border:0; border-radius:10px; font-weight:700; }
-    #payBtn{ background:#35c46a; color:#0b0f14; margin-top:10px; }
-    #clearBtn{ background:#2b3440; color:#fff; margin-top:10px; }
-    .hint{ font-size:12px; opacity:.85; line-height:1.35; }
-    .value{ font-family: ui-monospace, Menlo, Monaco, Consolas, monospace; }
-    hr{ border:0; border-top:1px solid rgba(255,255,255,.12); margin:10px 0; }
-    .selectBox { border: 1px solid #55aaff; background: rgba(75,160,255,.25); position: fixed; pointer-events: none; }
-    a{ color:#7dd3fc; }
   </style>
 </head>
 <body>
-  <div id="ui">
-    <div><b>Drag to select a voxel block</b></div>
-    <div class="hint">Left click + drag a rectangle, then release. Orbit controls still work (drag/zoom).</div>
-    <hr>
-    <div>Selection:</div>
-    <div class="value" id="selTxt">None</div>
-    <div style="margin-top:8px;">
-      Voxels: <span class="value" id="qty">0</span>
-      · Price: <span class="value" id="price">€0</span>
-    </div>
-    <button id="payBtn" disabled>Pay on Revolut (manual)</button>
-    <button id="clearBtn">Clear</button>
-    <div class="hint" style="margin-top:10px;">
-      Payment link: <span class="value">https://revolut.me/francelqup</span><br>
-      After paying, you’ll submit your logo + URL on <a href="./buy.html">buy.html</a>. [web:156]
-    </div>
-  </div>
+  <div id="dbg">Loading…</div>
 
 <script type="module">
-  import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js";
-  import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/controls/OrbitControls.js";
-  import { SelectionBox } from "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/interactive/SelectionBox.js";
-  import { SelectionHelper } from "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/interactive/SelectionHelper.js";
+  const dbg = (msg) => document.getElementById('dbg').textContent = msg;
 
-  const REVOLUT_LINK = "https://revolut.me/francelqup";
-  const PRICE_PER_VOXEL_EUR = 1;
+  try {
+    dbg("Step 1: importing three…");
 
-  const GRID_SIZE = 100;     // 100^3 = 1,000,000
-  const WORLD_HALF = GRID_SIZE / 2;
-  const STEP = 5;            // proxy density (precision vs performance)
+    // IMPORTANT: use the exact same version for all imports
+    const THREE = await import("https://unpkg.com/three@0.167.1/build/three.module.js");
+    const { OrbitControls } = await import("https://unpkg.com/three@0.167.1/examples/jsm/controls/OrbitControls.js");
 
-  const selTxt = document.getElementById("selTxt");
-  const qtyEl = document.getElementById("qty");
-  const priceEl = document.getElementById("price");
-  const payBtn = document.getElementById("payBtn");
-  const clearBtn = document.getElementById("clearBtn");
+    dbg("Step 2: creating scene…");
 
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0b0f14);
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0b0f14);
 
-  const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 2000);
-  camera.position.set(120, 120, 120);
+    const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 2000);
+    camera.position.set(120, 120, 120);
 
-  const renderer = new THREE.WebGLRenderer({ antialias:true });
-  renderer.setSize(innerWidth, innerHeight);
-  renderer.setPixelRatio(devicePixelRatio);
-  document.body.appendChild(renderer.domElement);
-
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-
-  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-  const dir = new THREE.DirectionalLight(0xffffff, 0.8);
-  dir.position.set(1, 2, 1);
-  scene.add(dir);
-
-  // Visible boundary cube so you "see" the world
-  const box = new THREE.BoxGeometry(GRID_SIZE, GRID_SIZE, GRID_SIZE);
-  const edges = new THREE.EdgesGeometry(box);
-  const boundary = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x2e3a48 }));
-  scene.add(boundary);
-
-  // Proxy points group (invisible) for SelectionBox to work [web:197][web:227]
-  const proxyGroup = new THREE.Group();
-  scene.add(proxyGroup);
-
-  const proxyGeom = new THREE.SphereGeometry(0.15, 6, 6);
-  const proxyMat = new THREE.MeshBasicMaterial({ color: 0x55aaff, transparent:true, opacity: 0.0 });
-
-  for (let x=0; x<=GRID_SIZE; x+=STEP) {
-    for (let y=0; y<=GRID_SIZE; y+=STEP) {
-      for (let z=0; z<=GRID_SIZE; z+=STEP) {
-        const m = new THREE.Mesh(proxyGeom, proxyMat);
-        m.position.set(x - WORLD_HALF, y - WORLD_HALF, z - WORLD_HALF);
-        m.userData.grid = { x, y, z }; // 0..100
-        proxyGroup.add(m);
-      }
-    }
-  }
-
-  const selectionBox = new SelectionBox(camera, proxyGroup);
-  const helper = new SelectionHelper(renderer, "selectBox");
-
-  let currentSelection = null;
-
-  function clearSelection(){
-    currentSelection = null;
-    selTxt.textContent = "None";
-    qtyEl.textContent = "0";
-    priceEl.textContent = "€0";
-    payBtn.disabled = true;
-    localStorage.removeItem("voxel_selection");
-  }
-  clearBtn.addEventListener("click", clearSelection);
-
-  document.addEventListener("pointerdown", (event) => {
-    if (event.button !== 0) return;
-    selectionBox.startPoint.set(
-      (event.clientX / innerWidth) * 2 - 1,
-      -(event.clientY / innerHeight) * 2 + 1,
-      0.5
-    );
-  });
-
-  document.addEventListener("pointerup", (event) => {
-    if (event.button !== 0) return;
-
-    selectionBox.endPoint.set(
-      (event.clientX / innerWidth) * 2 - 1,
-      -(event.clientY / innerHeight) * 2 + 1,
-      0.5
-    );
-
-    const selected = selectionBox.select(); // Object3D[] [web:197]
-    if (!selected.length) { clearSelection(); return; }
-
-    let minX=Infinity, minY=Infinity, minZ=Infinity;
-    let maxX=-Infinity, maxY=-Infinity, maxZ=-Infinity;
-
-    for (const obj of selected) {
-      const g = obj.userData.grid;
-      if (!g) continue;
-      minX = Math.min(minX, g.x); minY = Math.min(minY, g.y); minZ = Math.min(minZ, g.z);
-      maxX = Math.max(maxX, g.x); maxY = Math.max(maxY, g.y); maxZ = Math.max(maxZ, g.z);
-    }
-
-    // Convert proxy corners to voxel cells (0..99)
-    const voxelMin = { x: Math.max(0, Math.min(99, Math.min(minX, maxX))), y: Math.max(0, Math.min(99, Math.min(minY, maxY))), z: Math.max(0, Math.min(99, Math.min(minZ, maxZ))) };
-    const voxelMax = { x: Math.max(0, Math.min(99, Math.max(minX, maxX) - 1)), y: Math.max(0, Math.min(99, Math.max(minY, maxY) - 1)), z: Math.max(0, Math.min(99, Math.max(minZ, maxZ) - 1)) };
-
-    const dx = voxelMax.x - voxelMin.x + 1;
-    const dy = voxelMax.y - voxelMin.y + 1;
-    const dz = voxelMax.z - voxelMin.z + 1;
-    const qty = Math.max(0, dx*dy*dz);
-    const price = qty * PRICE_PER_VOXEL_EUR;
-
-    currentSelection = { min: voxelMin, max: voxelMax, qty, price };
-
-    selTxt.textContent = `${voxelMin.x},${voxelMin.y},${voxelMin.z} → ${voxelMax.x},${voxelMax.y},${voxelMax.z}`;
-    qtyEl.textContent = String(qty);
-    priceEl.textContent = `€${price}`;
-    payBtn.disabled = qty === 0;
-
-    localStorage.setItem("voxel_selection", JSON.stringify(currentSelection));
-  });
-
-  payBtn.addEventListener("click", async () => {
-    if (!currentSelection) return;
-
-    const note =
-      `VoxelDollarPage | ${currentSelection.qty} voxel(s) | ` +
-      `Block ${currentSelection.min.x},${currentSelection.min.y},${currentSelection.min.z}` +
-      `→${currentSelection.max.x},${currentSelection.max.y},${currentSelection.max.z} | €${currentSelection.price}`;
-
-    try { await navigator.clipboard.writeText(note); } catch {}
-    alert(
-      `Revolut will open in a new tab.\n\n` +
-      `1) Send €${currentSelection.price} to francelqup\n` +
-      `2) Paste this note (already copied):\n${note}\n\n` +
-      `3) Then fill the submission form on the next page.`
-    );
-
-    window.open(REVOLUT_LINK, "_blank", "noopener,noreferrer");
-    window.location.href = "./buy.html";
-  });
-
-  function animate(){
-    controls.update();
-    renderer.render(scene, camera);
-    requestAnimationFrame(animate);
-  }
-  animate();
-
-  addEventListener("resize", () => {
-    camera.aspect = innerWidth/innerHeight;
-    camera.updateProjectionMatrix();
+    const renderer = new THREE.WebGLRenderer({ antialias:true });
     renderer.setSize(innerWidth, innerHeight);
-  });
+    renderer.setPixelRatio(devicePixelRatio);
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+    const dir = new THREE.DirectionalLight(0xffffff, 1.0);
+    dir.position.set(1, 2, 1);
+    scene.add(dir);
+
+    // BIG RED cube so it's impossible to miss
+    const cube = new THREE.Mesh(
+      new THREE.BoxGeometry(80, 80, 80),
+      new THREE.MeshStandardMaterial({ color: 0xff3333, metalness: 0.1, roughness: 0.6 })
+    );
+    scene.add(cube);
+
+    // And edges overlay
+    const edges = new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.BoxGeometry(100,100,100)),
+      new THREE.LineBasicMaterial({ color: 0x7dd3fc })
+    );
+    scene.add(edges);
+
+    dbg("OK ✅ If you see a red cube, Three.js works.\nNext we re-add selection.");
+
+    function animate(){
+      controls.update();
+      cube.rotation.y += 0.004;
+      cube.rotation.x += 0.002;
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    addEventListener("resize", () => {
+      camera.aspect = innerWidth/innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+
+  } catch (err) {
+    dbg("ERROR ❌ Three.js did not start.\n\n" + (err?.stack || err));
+  }
 </script>
 </body>
 </html>
