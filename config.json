@@ -1,16 +1,1 @@
-{
-  "voxels": [
-    {
-      "id": "10-10-10",
-      "color": 0xff0000,
-      "url": "https://github.com",
-      "tooltip": "GitHub - Powered by"
-    },
-    {
-      "id": "5-5-5",
-      "color": 0x00ff00,
-      "url": "https://perplexity.ai",
-      "tooltip": "Perplexity AI"
-    }
-  ]
-}
+
