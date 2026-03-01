@@ -1,1 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Submit your Voxel</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#0b0f14; color:#fff; padding: 24px; max-width: 760px; margin: 0 auto; }
+    .card { background: rgba(255,255,255,.06); padding: 16px; border-radius: 12px; margin: 14px 0; }
+    label { display:block; margin-top: 10px; opacity: .9; }
+    input, textarea { width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid rgba(255,255,255,.18); background:#101826; color:#fff; }
+    button { padding: 12px 14px; border: 0; border-radius: 10px; cursor:pointer; font-weight: 700; }
+    #sendBtn { background:#35c46a; color:#0b0f14; width: 100%; margin-top: 14px; }
+    #copyBtn { background:#2b3440; color:#fff; width: 100%; margin-top: 10px; }
+    small { opacity:.85; }
+    canvas { background:#000; border-radius: 10px; border: 1px solid rgba(255,255,255,.18); margin-top: 10px; }
+    a { color:#7dd3fc; }
+  </style>
+</head>
+<body>
+  <h1>Submit your voxel (manual approval)</h1>
+  <p><small>After you pay via Revolut, fill this form. We’ll publish your voxel(s) after review.</small></p>
+
+  <div class="card">
+    <b>1) Your selection</b>
+    <p id="selView">No selection found. Go back to <a href="./index.html">viewer</a> and select a block.</p>
+    <button id="copyBtn" type="button">Copy selection note</button>
+  </div>
+
+  <div class="card">
+    <b>2) Your content</b>
+
+    <label>Destination URL (must start with https://)</label>
+    <input id="url" placeholder="https://your-site.com" />
+
+    <label>Tooltip text</label>
+    <input id="tooltip" maxlength="60" placeholder="Your brand (max 60 chars)" />
+
+    <label>Your email (so I can contact you if needed)</label>
+    <input id="email" placeholder="name@example.com" />
+
+    <label>Logo image (PNG/JPG, will be resized)</label>
+    <input id="logo" type="file" accept="image/*" />
+    <canvas id="preview" width="180" height="180"></canvas>
 
