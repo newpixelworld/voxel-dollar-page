@@ -49,9 +49,12 @@ scene.add(
   )
 );
 
-// Invisible pick plane (we use a fixed plane for now: the X-Y plane at a chosen Z)
-let activePlaneZ = 50; // you can later make this selectable
-const pickPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -(activePlaneZ - WORLD_HALF)); // z = activePlaneZ in voxel coords
+// Pick plane (XY plane at chosen Z slice)
+const activePlaneZ = 50;
+const pickPlane = new THREE.Plane(
+  new THREE.Vector3(0, 0, 1),
+  -(activePlaneZ - WORLD_HALF)
+);
 
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -103,7 +106,6 @@ function screenToWorldOnPlane(clientX, clientY) {
 }
 
 function worldToVoxel(p) {
-  // world coords are centered at 0; voxel coords are 0..99
   const x = clamp(Math.floor(p.x + WORLD_HALF), 0, GRID_SIZE - 1);
   const y = clamp(Math.floor(p.y + WORLD_HALF), 0, GRID_SIZE - 1);
   const z = clamp(Math.floor(p.z + WORLD_HALF), 0, GRID_SIZE - 1);
@@ -112,7 +114,6 @@ function worldToVoxel(p) {
 
 // CLICK = 1 voxel
 renderer.domElement.addEventListener("click", (e) => {
-  // If it was a drag, ignore click
   if (dragging) return;
 
   modeTxt.textContent = "Mode: click = 1 voxel";
@@ -142,8 +143,12 @@ renderer.domElement.addEventListener("pointerup", (e) => {
   if (e.button !== 0) return;
   helper.onSelectOver(e);
 
-  if (!dragStart) { dragging = false; return; }
-  if (!dragEnd) { dragging = false; dragStart = null; return; }
+  if (!dragStart || !dragEnd) {
+    dragging = false;
+    dragStart = null;
+    dragEnd = null;
+    return;
+  }
 
   modeTxt.textContent = "Mode: drag = block";
 
@@ -151,7 +156,10 @@ renderer.domElement.addEventListener("pointerup", (e) => {
   const b = screenToWorldOnPlane(dragEnd.x, dragEnd.y);
   dragging = false;
 
-  if (!a || !b) { dragStart = null; dragEnd = null; return; }
+  dragStart = null;
+  dragEnd = null;
+
+  if (!a || !b) return;
 
   const va = worldToVoxel(a);
   const vb = worldToVoxel(b);
@@ -159,7 +167,7 @@ renderer.domElement.addEventListener("pointerup", (e) => {
   const minXY = { x: Math.min(va.x, vb.x), y: Math.min(va.y, vb.y) };
   const maxXY = { x: Math.max(va.x, vb.x), y: Math.max(va.y, vb.y) };
 
-  const depth = parseInt(depthEl.value, 10); // 1..100
+  const depth = parseInt(depthEl.value, 10);
   const z0 = clamp(va.z, 0, GRID_SIZE - 1);
   const z1 = clamp(z0 + depth - 1, 0, GRID_SIZE - 1);
 
@@ -167,6 +175,39 @@ renderer.domElement.addEventListener("pointerup", (e) => {
   const max = { x: maxXY.x, y: maxXY.y, z: Math.max(z0, z1) };
 
   setSelection(min, max);
+});
 
-  dragStart = null;
-  dragEnd =
+// Pay
+payBtn.addEventListener("click", async () => {
+  if (!current) return;
+
+  const note =
+    `VoxelDollarPage | ${current.qty} voxel(s) | Block ` +
+    `${current.min.x},${current.min.y},${current.min.z}→${current.max.x},${current.max.y},${current.max.z} | €${current.price}`;
+
+  try { await navigator.clipboard.writeText(note); } catch {}
+
+  alert(
+    `Revolut will open in a new tab.\n\n` +
+    `1) Send €${current.price} to francelqup\n` +
+    `2) Paste the note (already copied)\n` +
+    `3) Then submit your logo + link on buy.html`
+  );
+
+  window.open(REVOLUT_LINK, "_blank", "noopener,noreferrer");
+  window.location.href = "./buy.html";
+});
+
+// Render loop
+function animate() {
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+animate();
+
+// Resize
+addEventListener("resize", () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer
