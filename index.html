@@ -27,7 +27,6 @@
     input[type="range"] { width:100%; }
   </style>
 
-  <!-- Import map: lets us use import 'three' on GitHub Pages -->
   <script type="importmap">
   {
     "imports": {
@@ -41,4 +40,35 @@
 <body>
   <div id="ui">
     <div><b>VoxelDollarPage</b></div>
-    <div class="hint" id="modeTxt">Mode: click = 1
+    <div class="hint" id="modeTxt">Mode: click = 1 voxel, drag = block</div>
+
+    <hr>
+
+    <div><b>Selection</b></div>
+    <div class="value" id="selTxt">None</div>
+
+    <div style="margin-top:8px;">
+      Voxels: <span class="value" id="qty">0</span>
+      · Price: <span class="value" id="price">€0</span>
+    </div>
+
+    <div style="margin-top:10px;">
+      Depth (Z size): <span class="value" id="depthLabel">1</span>
+      <input id="depth" type="range" min="1" max="100" value="1" />
+      <div class="hint">Drag selects an area on a plane, then extrudes by this depth.</div>
+    </div>
+
+    <button id="payBtn" disabled>Pay on Revolut (manual)</button>
+    <button id="clearBtn">Clear</button>
+
+    <div class="hint" style="margin-top:10px;">
+      Revolut link: <span class="value">https://revolut.me/francelqup</span><br>
+      After paying, submit your logo + URL here: <a href="./buy.html">buy.html</a>
+    </div>
+  </div>
+
+  <!-- IMPORTANT: this must exist or nothing runs -->
+  <script type="module" src="./app.js?v=1"></script>
+</body>
+</html>
+
