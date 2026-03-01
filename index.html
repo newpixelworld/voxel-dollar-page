@@ -7,10 +7,10 @@
   <style>
     body { margin:0; overflow:hidden; background:#0b0f14; font-family: Arial, sans-serif; }
     #dbg {
-      position:fixed; bottom:12px; left:12px; z-index:9999;
-      background:rgba(0,0,0,.75); color:#fff; padding:10px 12px; border-radius:10px;
-      max-width: 520px; font-size: 12px; line-height: 1.35;
+      position:fixed; top:12px; left:12px; right:12px; z-index:9999;
+      background:rgba(0,0,0,.78); color:#fff; padding:12px 14px; border-radius:12px;
       border: 1px solid rgba(255,255,255,.15);
+      font-size: 12px; line-height: 1.35;
       white-space: pre-wrap;
     }
   </style>
@@ -19,16 +19,16 @@
   <div id="dbg">Loading…</div>
 
 <script type="module">
-  const dbg = (msg) => document.getElementById('dbg').textContent = msg;
+  const out = (s) => document.getElementById('dbg').textContent = s;
 
   try {
-    dbg("Step 1: importing three…");
+    out("Importing Three.js…");
 
-    // IMPORTANT: use the exact same version for all imports
+    // Usa UNPKG con versione fissa, stesso pattern degli esempi.
     const THREE = await import("https://unpkg.com/three@0.167.1/build/three.module.js");
     const { OrbitControls } = await import("https://unpkg.com/three@0.167.1/examples/jsm/controls/OrbitControls.js");
 
-    dbg("Step 2: creating scene…");
+    out("Three.js loaded ✅ Creating scene…");
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0b0f14);
@@ -49,21 +49,21 @@
     dir.position.set(1, 2, 1);
     scene.add(dir);
 
-    // BIG RED cube so it's impossible to miss
+    // Cubo rosso enorme (se non lo vedi, Three non sta renderizzando)
     const cube = new THREE.Mesh(
       new THREE.BoxGeometry(80, 80, 80),
       new THREE.MeshStandardMaterial({ color: 0xff3333, metalness: 0.1, roughness: 0.6 })
     );
     scene.add(cube);
 
-    // And edges overlay
+    // Contorno azzurro
     const edges = new THREE.LineSegments(
       new THREE.EdgesGeometry(new THREE.BoxGeometry(100,100,100)),
       new THREE.LineBasicMaterial({ color: 0x7dd3fc })
     );
     scene.add(edges);
 
-    dbg("OK ✅ If you see a red cube, Three.js works.\nNext we re-add selection.");
+    out("OK ✅ You should see a big red cube.\nIf you don't, tell me what you see on screen.");
 
     function animate(){
       controls.update();
@@ -81,7 +81,7 @@
     });
 
   } catch (err) {
-    dbg("ERROR ❌ Three.js did not start.\n\n" + (err?.stack || err));
+    out("ERROR ❌ Three.js did not start.\n\n" + (err?.stack || err));
   }
 </script>
 </body>
