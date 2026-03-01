@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <title>Compra Voxel - 1€!</title>
+    <style> body { font-family: Arial; text-align: center; padding: 50px; background: #111; color: white; } button { background: lime; color: black; padding: 15px 30px; font-size: 20px; border: none; cursor: pointer; } </style>
+</head>
+<body>
+    <h1>🥑 Compra il tuo Voxel 3D</h1>
+    <p>Scegli coordinate (es. 5-5-5): <input id="coords" placeholder="x-y-z" value="10-10-10"></p>
+    <p>URL del tuo sito/logo: <input id="url" placeholder="https://tuosito.it" style="width: 300px;"></p>
+    <button onclick="buyVoxel()">PAGA 1€ e Prenota!</button>
+    <p id="status"></p>
+    <script>
+        function buyVoxel() {
+            const coords = document.getElementById('coords').value;
+            const url = document.getElementById('url').value;
+            document.getElementById('status').innerHTML = `Voxel ${coords} prenotato! Invia prova a <a href="mailto:tuoemail@gmail.com?subject=Voxel ${coords}&body=URL: ${url}">tuoemail@gmail.com</a>. Poi appare in 3D!`;
+        }
+    </script>
+    <a href="index.html" style="color: lime; font-size: 24px;">← Torna al Viewer</a>
+</body>
+</html>
