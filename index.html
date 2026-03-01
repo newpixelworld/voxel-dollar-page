@@ -1,17 +1,24 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>VoxelDollarPage - Compra il tuo Voxel 3D per 1€!</title>
-    <style> body { margin: 0; overflow: hidden; } #info { position: absolute; top: 10px; left: 10px; color: white; z-index: 100; background: rgba(0,0,0,0.5); padding: 10px; } </style>
+    <title>VoxelDollarPage - Buy Your 3D Voxel for $1!</title>
+    <style> 
+        body { margin: 0; overflow: hidden; font-family: Arial; } 
+        #info { position: absolute; top: 10px; left: 10px; color: white; z-index: 100; background: rgba(0,0,0,0.7); padding: 20px; border-radius: 10px; max-width: 300px; }
+        #selectMode { background: lime; color: black; padding: 10px; cursor: pointer; } 
+        .selected { border: 2px solid lime !important; }
+    </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
     <div id="info">
-        <h2>🥑 VoxelDollarPage</h2>
-        <p><strong>1 Voxel = 1€</strong> | Grid 20x20x20 (8000 voxel) | <a href="buy.html" style="color: lime;">COMPRA ORA</a></p>
-        <p>Trascina per ruotare, zoom ruota mouse.</p>
+        <h2>🌐 VoxelDollarPage</h2>
+        <p><strong>1 Voxel = $1</strong> | 100x100x100 = 1,000,000 voxels | <span id="selectMode" onclick="toggleSelect()">👆 SELECT MODE</span></p>
+        <p id="selectedVoxel">No voxel selected</p>
+        <p>Drag to rotate, scroll zoom. Click voxel to select/buy.</p>
+        <a href="https://paypal.me/voxeldollar/1" target="_blank" style="background: #003087; color: white; padding: 10px; text-decoration: none; border-radius: 5px;">💰 BUY SELECTED ($1)</a>
     </div>
     <script src="voxel.js"></script>
 </body>
