@@ -1,22 +1,33 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
-    <title>Compra Voxel - 1€!</title>
-    <style> body { font-family: Arial; text-align: center; padding: 50px; background: #111; color: white; } button { background: lime; color: black; padding: 15px 30px; font-size: 20px; border: none; cursor: pointer; } </style>
+    <title>Buy Voxel - $1 PayPal</title>
+    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID¤cy=USD"></script>
+    <style> body { font-family: Arial; text-align: center; padding: 50px; background: #111; color: white; } input, canvas { margin: 10px; } #paypal-button { margin: 20px; } </style>
 </head>
 <body>
-    <h1>🥑 Compra il tuo Voxel 3D</h1>
-    <p>Scegli coordinate (es. 5-5-5): <input id="coords" placeholder="x-y-z" value="10-10-10"></p>
-    <p>URL del tuo sito/logo: <input id="url" placeholder="https://tuosito.it" style="width: 300px;"></p>
-    <button onclick="buyVoxel()">PAGA 1€ e Prenota!</button>
-    <p id="status"></p>
+    <h1>🌐 Checkout Voxel</h1>
+    <p>Selected Voxel: <span id="voxelInfo">From viewer</span></p>
+    <input type="file" id="logoUpload" accept="image/*">
+    <canvas id="logoPreview" width="100" height="100" style="border:1px solid white;"></canvas>
+    <div id="paypal-button-container"></div>
+    
     <script>
-        function buyVoxel() {
-            const coords = document.getElementById('coords').value;
-            const url = document.getElementById('url').value;
-            document.getElementById('status').innerHTML = `Voxel ${coords} prenotato! Invia prova a <a href="mailto:tuoemail@gmail.com?subject=Voxel ${coords}&body=URL: ${url}">tuoemail@gmail.com</a>. Poi appare in 3D!`;
-        }
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: { value: '1.00' }
+                    }]
+                });
+            },
+            onApprove: async function(data) {
+                // TODO: upload logo a Imgur/Cloudinary → aggiungi config.json → git push
+                alert('✅ PAID! Logo uploaded. Voxel live in 5min. Check viewer!');
+                window.location.href = 'index.html';
+            }
+        }).render('#paypal-button-container');
     </script>
-    <a href="index.html" style="color: lime; font-size: 24px;">← Torna al Viewer</a>
+    <a href="index.html" style="color: lime; font-size: 24px;">← Back to Viewer</a>
 </body>
 </html>
