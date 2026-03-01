@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>VoxelDollarPage</title>
+
   <style>
     body { margin:0; overflow:hidden; background:#0b0f14; font-family: Arial, sans-serif; }
     #ui{
@@ -13,14 +14,20 @@
       border:1px solid rgba(255,255,255,.12);
     }
     .value{ font-family: ui-monospace, Menlo, Monaco, Consolas, monospace; }
-    button{ width:100%; padding:10px 12px; border:0; border-radius:10px; font-weight:700; cursor:pointer; }
+    button{
+      width:100%; padding:10px 12px; border:0; border-radius:10px;
+      font-weight:700; cursor:pointer;
+    }
     #payBtn{ background:#35c46a; color:#06110a; margin-top:10px; }
     #clearBtn{ background:#2b3440; color:#fff; margin-top:10px; }
     .hint{ font-size:12px; opacity:.85; line-height:1.35; }
+    hr{ border:0; border-top:1px solid rgba(255,255,255,.12); margin:10px 0; }
+    a{ color:#7dd3fc; }
     .selectBox { border:1px solid #55aaff; background:rgba(75,160,255,.25); position:fixed; pointer-events:none; }
+    input[type="range"] { width:100%; }
   </style>
 
-  <!-- IMPORTMAP: serve per evitare l’errore “three does not resolve to a valid URL” -->
+  <!-- Import map: lets us use import 'three' on GitHub Pages -->
   <script type="importmap">
   {
     "imports": {
@@ -30,24 +37,8 @@
   }
   </script>
 </head>
+
 <body>
   <div id="ui">
-    <div><b>Drag to select a voxel block</b></div>
-    <div class="hint">Left click + drag. Release to finalize.</div>
-    <hr style="border:0;border-top:1px solid rgba(255,255,255,.12);margin:10px 0;">
-    <div>Selection:</div>
-    <div class="value" id="selTxt">None</div>
-    <div style="margin-top:8px;">
-      Voxels: <span class="value" id="qty">0</span> · Price: <span class="value" id="price">€0</span>
-    </div>
-    <button id="payBtn" disabled>Pay on Revolut (manual)</button>
-    <button id="clearBtn">Clear</button>
-    <div class="hint" style="margin-top:10px;">
-      Revolut: <span class="value">revolut.me/francelqup</span><br>
-      After paying you’ll submit logo + link in <a href="./buy.html" style="color:#7dd3fc">buy.html</a>.
-    </div>
-  </div>
-
-  <script type="module" src="./app.js"></script>
-</body>
-</html>
+    <div><b>VoxelDollarPage</b></div>
+    <div class="hint" id="modeTxt">Mode: click = 1
