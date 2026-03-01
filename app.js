@@ -210,4 +210,5 @@ animate();
 addEventListener("resize", () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
-  renderer
+  renderer.setSize(innerWidth, innerHeight);
+});
