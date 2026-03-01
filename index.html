@@ -1,25 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>VoxelDollarPage - Buy Your 3D Voxel for $1!</title>
-    <style> 
-        body { margin: 0; overflow: hidden; font-family: Arial; } 
-        #info { position: absolute; top: 10px; left: 10px; color: white; z-index: 100; background: rgba(0,0,0,0.7); padding: 20px; border-radius: 10px; max-width: 300px; }
-        #selectMode { background: lime; color: black; padding: 10px; cursor: pointer; } 
-        .selected { border: 2px solid lime !important; }
-    </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VoxelDollarPage (Prototype)</title>
+  <style>
+    body { margin:0; overflow:hidden; font-family: Arial, sans-serif; background:#0b0f14; }
+    #ui {
+      position: fixed; top: 12px; left: 12px; z-index: 10;
+      color: #fff; background: rgba(0,0,0,.6); padding: 12px 14px; border-radius: 10px;
+      width: 320px;
+    }
+    #ui button { cursor:pointer; padding:10px 12px; border:0; border-radius:8px; }
+    #payBtn { background:#35c46a; color:#0b0f14; font-weight:700; width: 100%; margin-top: 8px; }
+    #clearBtn { background:#2b3440; color:#fff; width: 100%; margin-top: 8px; }
+    .hint { font-size: 12px; opacity: .85; line-height: 1.35; }
+    .value { font-family: ui-monospace, Menlo, Monaco, Consolas, monospace; }
+    .selectBox { border: 1px solid #55aaff; background: rgba(75,160,255,.25); position: fixed; pointer-events: none; }
+  </style>
 </head>
 <body>
-    <div id="info">
-        <h2>🌐 VoxelDollarPage</h2>
-        <p><strong>1 Voxel = $1</strong> | 100x100x100 = 1,000,000 voxels | <span id="selectMode" onclick="toggleSelect()">👆 SELECT MODE</span></p>
-        <p id="selectedVoxel">No voxel selected</p>
-        <p>Drag to rotate, scroll zoom. Click voxel to select/buy.</p>
-        <a href="https://paypal.me/voxeldollar/1" target="_blank" style="background: #003087; color: white; padding: 10px; text-decoration: none; border-radius: 5px;">💰 BUY SELECTED ($1)</a>
+  <div id="ui">
+    <div><b>Drag to select a voxel block</b></div>
+    <div class="hint">Hold left mouse button and drag a rectangle. Release to finalize selection.</div>
+    <hr style="border:0;border-top:1px solid rgba(255,255,255,.12);margin:10px 0;">
+    <div>Selection (min→max):</div>
+    <div class="value" id="selTxt">None</div>
+    <div style="margin-top:8px;">Voxels: <span class="value" id="qty">0</span> · Price: <span class="value" id="price">€0</span></div>
+    <button id="payBtn" disabled>Pay with Revolut (manual)</button>
+    <button id="clearBtn">Clear</button>
+    <div class="hint" style="margin-top:10px;">
+      Payment goes to: <span class="value">https://revolut.me/francelqup</span><br>
+      After paying, you’ll send the note shown here.
     </div>
-    <script src="voxel.js"></script>
+  </div>
+
+  <script type="module" src="./app.js"></script>
 </body>
 </html>
