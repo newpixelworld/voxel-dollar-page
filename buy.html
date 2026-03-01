@@ -1,6 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <title>Buy Voxel $1 - PayPal</title>
-    <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"></script> <!-- DEMO sb, sostituisci con tua -->
-    <style> body { font-family: Arial; text-align
+    <title>Buy Voxel $1 - PayPal + Logo</title>
+    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_LIVE_CLIENT_ID_HERE¤cy=USD"></script>
+    <style>body{font-family:Arial;text-align:center;padding:50px;background:#111;color:white;} input,canvas{margin:10px;} canvas{border:1px lime solid;}</style>
+</head>
+<body>
+    <h1>🌐 Voxel Checkout $1</h1>
+    <p id="voxelInfo">Selected from viewer</p>
+    <br>
+    <input type="file" id="logo" accept="image/*">
+    <canvas id="preview" width="120" height="120"></canvas>
+    <br>
+    <div id="paypal"></div>
+    
+    <script>
+        // Preview logo
+        document.getElementById('logo').onchange = e => {
+            const file = e.target.files[0];
+            const ctx = document.getElementById('preview').getContext('2d');
+            const img = new Image();
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0, 120, 120);
+            };
+            img.src = URL.createObjectURL(file);
+        };
+        
+        // PayPal
+        paypal.Buttons({
+            createOrder: (data, actions) => actions.order.create({
+                purchase_units: [{amount: {value: '1.00'}}]
+            }),
+            onApprove: async (data) => {
+                // Upload logo Imgur API (gratis)
+                const file = document.getElementById('logo').files[0];
+                if(file) {
+                    const form = new FormData();
+                    form.append('image', file);
+                    const resp = await fetch('https://api.imgur.com/3/image', {
+                        method: 'POST',
+                        headers: {'Authorization': 'Client-ID 414ec4d691e08d4'},
+                        body: form
+                    });
+                    const imgData = await resp.json();
+                    const logoUrl = imgData.data.link;
+                    alert(`✅ PAID! Logo: ${logoUrl}\nEmail voxel@newpixelworld.com con ID+URL per aggiungere!`);
+                } else {
+                    alert('✅ PAID! Aggiungi logo dopo.');
+                }
+                window.location.href = 'index.html';
+            }
+        }).render('#paypal');
+    </script>
+</body>
+</html>
