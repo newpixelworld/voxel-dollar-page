@@ -1,21 +1,26 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>VoxelDollarPage - Three.js OK</title>
+  <title>VoxelDollarPage</title>
   <style>
     body { margin:0; overflow:hidden; background:#0b0f14; font-family: Arial, sans-serif; }
-    #dbg {
-      position:fixed; top:12px; left:12px; right:12px; z-index:9999;
-      background:rgba(0,0,0,.78); color:#fff; padding:12px 14px; border-radius:12px;
-      border: 1px solid rgba(255,255,255,.15);
-      font-size: 12px; line-height: 1.35;
-      white-space: pre-wrap;
+    #ui{
+      position:fixed; top:12px; left:12px; z-index:10;
+      width:360px; padding:12px 14px; border-radius:12px;
+      background:rgba(0,0,0,.65); color:#fff;
+      border:1px solid rgba(255,255,255,.12);
     }
+    .value{ font-family: ui-monospace, Menlo, Monaco, Consolas, monospace; }
+    button{ width:100%; padding:10px 12px; border:0; border-radius:10px; font-weight:700; cursor:pointer; }
+    #payBtn{ background:#35c46a; color:#06110a; margin-top:10px; }
+    #clearBtn{ background:#2b3440; color:#fff; margin-top:10px; }
+    .hint{ font-size:12px; opacity:.85; line-height:1.35; }
+    .selectBox { border:1px solid #55aaff; background:rgba(75,160,255,.25); position:fixed; pointer-events:none; }
   </style>
 
-  <!-- Import map: makes 'three' resolve to a real URL -->
+  <!-- IMPORTMAP: serve per evitare l’errore “three does not resolve to a valid URL” -->
   <script type="importmap">
   {
     "imports": {
@@ -26,70 +31,23 @@
   </script>
 </head>
 <body>
-  <div id="dbg">Loading…</div>
+  <div id="ui">
+    <div><b>Drag to select a voxel block</b></div>
+    <div class="hint">Left click + drag. Release to finalize.</div>
+    <hr style="border:0;border-top:1px solid rgba(255,255,255,.12);margin:10px 0;">
+    <div>Selection:</div>
+    <div class="value" id="selTxt">None</div>
+    <div style="margin-top:8px;">
+      Voxels: <span class="value" id="qty">0</span> · Price: <span class="value" id="price">€0</span>
+    </div>
+    <button id="payBtn" disabled>Pay on Revolut (manual)</button>
+    <button id="clearBtn">Clear</button>
+    <div class="hint" style="margin-top:10px;">
+      Revolut: <span class="value">revolut.me/francelqup</span><br>
+      After paying you’ll submit logo + link in <a href="./buy.html" style="color:#7dd3fc">buy.html</a>.
+    </div>
+  </div>
 
-  <script type="module">
-    const out = (s) => document.getElementById('dbg').textContent = s;
-
-    try {
-      out("Importing three via importmap…");
-
-      import * as THREE from "three";
-      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-
-      out("Three.js loaded ✅ Creating scene…");
-
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x0b0f14);
-
-      const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 2000);
-      camera.position.set(120, 120, 120);
-
-      const renderer = new THREE.WebGLRenderer({ antialias:true });
-      renderer.setSize(innerWidth, innerHeight);
-      renderer.setPixelRatio(devicePixelRatio);
-      document.body.appendChild(renderer.domElement);
-
-      const controls = new OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-
-      scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-      const dir = new THREE.DirectionalLight(0xffffff, 1.0);
-      dir.position.set(1, 2, 1);
-      scene.add(dir);
-
-      const cube = new THREE.Mesh(
-        new THREE.BoxGeometry(80, 80, 80),
-        new THREE.MeshStandardMaterial({ color: 0xff3333, metalness: 0.1, roughness: 0.6 })
-      );
-      scene.add(cube);
-
-      const edges = new THREE.LineSegments(
-        new THREE.EdgesGeometry(new THREE.BoxGeometry(100,100,100)),
-        new THREE.LineBasicMaterial({ color: 0x7dd3fc })
-      );
-      scene.add(edges);
-
-      out("OK ✅ You should see a big red cube now.");
-
-      function animate(){
-        controls.update();
-        cube.rotation.y += 0.004;
-        cube.rotation.x += 0.002;
-        renderer.render(scene, camera);
-        requestAnimationFrame(animate);
-      }
-      animate();
-
-      addEventListener("resize", () => {
-        camera.aspect = innerWidth/innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(innerWidth, innerHeight);
-      });
-
-    } catch (err) {
-      out("ERROR ❌\n\n" + (err?.stack || err));
-    }
-  </script>
+  <script type="module" src="./app.js"></script>
 </body>
 </html>
